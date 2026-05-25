@@ -1,3 +1,7 @@
+## Extera 26.2.5
+- Korean translations
+- Locale fixes
+
 ## Extera 26.2.4
 - Redesign navigation bar.
 - Make legacy navigation bar more Material 3 compliant.

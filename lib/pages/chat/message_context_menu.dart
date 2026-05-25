@@ -465,7 +465,8 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                           ],
                           if (room.canSendDefaultMessages &&
                               event.senderId == client.userID! &&
-                              event.type == EventTypes.Message) ...[
+                              event.type == EventTypes.Message &&
+                              !event.redacted) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.edit_outlined,
@@ -580,23 +581,24 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             },
                           ),
                           const ListDivider(),
-                          _buildMenuItem(
-                            event: event,
-                            icon: Icons.copy_outlined,
-                            label: L10n.of(context).copy,
-                            onPressed: () {
-                              controller.closeMessageMenu();
-                              Clipboard.setData(
-                                ClipboardData(
-                                  text: event
-                                      .getDisplayEvent(timeline!)
-                                      .calcLocalizedBodyFallback(
-                                        MatrixLocals(L10n.of(context)),
-                                      ),
-                                ),
-                              );
-                            },
-                          ),
+                          if (!event.redacted)
+                            _buildMenuItem(
+                              event: event,
+                              icon: Icons.copy_outlined,
+                              label: L10n.of(context).copy,
+                              onPressed: () {
+                                controller.closeMessageMenu();
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text: event
+                                        .getDisplayEvent(timeline!)
+                                        .calcLocalizedBodyFallback(
+                                          MatrixLocals(L10n.of(context)),
+                                        ),
+                                  ),
+                                );
+                              },
+                            ),
                           const ListDivider(),
                           _buildMenuItem(
                             event: event,
@@ -619,7 +621,8 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                           ),
                           const ListDivider(),
                           if (!room.encrypted &&
-                              AppSettings.messageTranslation.value) ...[
+                              AppSettings.messageTranslation.value &&
+                              !event.redacted) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.translate,
@@ -678,10 +681,11 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                       borderRadius: borderRadius,
                       child: Column(
                         children: [
-                          if (event.canRedact ||
-                              (clients!.any(
-                                (cl) => event.senderId == cl!.userID,
-                              ))) ...[
+                          if ((event.canRedact ||
+                                  (clients!.any(
+                                    (cl) => event.senderId == cl!.userID,
+                                  ))) &&
+                              !event.redacted) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.delete_outlined,
