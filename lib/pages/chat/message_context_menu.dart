@@ -201,7 +201,8 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                     ),
                   if (event.status == EventStatus.sent ||
                       event.status == EventStatus.synced) ...[
-                    if (room.canSendEvent(EventTypes.Reaction))
+                    if (room.canSendEvent(EventTypes.Reaction) &&
+                        !event.redacted)
                       Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Material(
@@ -437,7 +438,8 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             ),
                             const ListDivider(),
                           ],
-                          if (room.canSendDefaultMessages) ...[
+                          if (room.canSendDefaultMessages &&
+                              !event.redacted) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.reply_outlined,
@@ -449,7 +451,8 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             ),
                             const ListDivider(),
                           ],
-                          if (room.canSendDefaultMessages) ...[
+                          if (room.canSendDefaultMessages &&
+                              !event.redacted) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.chat_bubble_outline,
