@@ -78,11 +78,10 @@ Before building on Windows, install the following:
 * **[CMake](https://cmake.org/download/)**
 * **[Rust](https://rustup.rs)** (`rustup`) 
 * **[OpenSSL](https://slproweb.com/products/Win32OpenSSL.html)**
-* **[Flutter SDK](https://docs.flutter.dev/get-started/install/windows)** — enable Windows Desktop support:
-   ```powershell
-   flutter config --enable-windows-desktop
-   ```
-
+* **[Flutter SDK](https://docs.flutter.dev/get-started/install/windows)**
+> [!IMPORTANT]
+> 
+- APT (Debian based)
 ## License
 
 This project is licensed under the [AGPL-3.0 License](LICENSE). See the LICENSE file for details.

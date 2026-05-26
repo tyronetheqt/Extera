@@ -197,8 +197,6 @@ abstract class ClientManager {
         ),
         iOS: DarwinNotificationDetails(sound: 'notification.caf'),
         windows: WindowsNotificationDetails(
-          appName: 'Extera',
-          appUserModelId: 'im.extera.app',
         ),
       ),
     );
