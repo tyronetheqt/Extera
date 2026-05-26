@@ -109,3 +109,4 @@ install(CODE "
     )
   endif()
 " COMPONENT Runtime)
+target_compile_options(${BINARY_NAME} PRIVATE /W0)
