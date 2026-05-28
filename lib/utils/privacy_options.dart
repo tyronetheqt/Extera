@@ -14,8 +14,9 @@ bool shouldSendPublicReadReceipts(Client client, String roomId) {
   }
   final content =
       client.accountData['xyz.extera.room_privacy_settings.$roomId']!.content;
-  return content.tryGet('read_receipts') ??
-      AppSettings.sendPublicReadReceipts.value;
+  return content.containsKey('read_receipts')
+      ? content.tryGet<bool>('read_receipts')!
+      : AppSettings.sendPublicReadReceipts.value;
 }
 
 bool shouldSendTypingNotifications(Client client, String roomId) {
@@ -24,8 +25,9 @@ bool shouldSendTypingNotifications(Client client, String roomId) {
   }
   final content =
       client.accountData['xyz.extera.room_privacy_settings.$roomId']!.content;
-  return content.tryGet('typing_notifications') ??
-      AppSettings.sendTypingNotifications.value;
+  return content.containsKey('typing_notifications')
+      ? content.tryGet<bool>('typing_notifications')!
+      : AppSettings.sendTypingNotifications.value;
 }
 
 bool shouldAutoLoadMedia(Client client, String roomId) {
@@ -34,5 +36,7 @@ bool shouldAutoLoadMedia(Client client, String roomId) {
   }
   final content =
       client.accountData['xyz.extera.room_privacy_settings.$roomId']!.content;
-  return content.tryGet('auto_load_media') ?? AppSettings.autoLoadMedia.value;
+  return content.containsKey('auto_load_media')
+      ? content.tryGet<bool>('auto_load_media')!
+      : AppSettings.autoLoadMedia.value;
 }
