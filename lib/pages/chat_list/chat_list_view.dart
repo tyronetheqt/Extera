@@ -1,17 +1,15 @@
 import 'package:extera_next/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 
-import 'package:go_router/go_router.dart';
-
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat_list/chat_list.dart';
 import 'package:extera_next/pages/chat_list/chat_list_bottom_navbar.dart';
 import 'package:extera_next/pages/chat_list/chat_list_legacy_bottom_navbar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:extera_next/widgets/navigation_rail.dart';
 import 'chat_list_body.dart';
+import 'start_chat_fab.dart';
 
 class ChatListView extends StatelessWidget {
   final ChatListController controller;
@@ -25,15 +23,12 @@ class ChatListView extends StatelessWidget {
     final theme = Theme.of(context);
 
     final fab = AppSettings.useLegacyNavBar.value
-        ? FloatingActionButton.extended(
-            onPressed: () => context.go('/rooms/newprivatechat'),
-            icon: const Icon(Icons.chat_outlined),
-            label: Text(L10n.of(context).newChat),
+        ? ValueListenableBuilder(
+            valueListenable: controller.scrolledToTop,
+            builder: (context, scrolledToTop, _) =>
+                StartChatFab(extended: scrolledToTop),
           )
-        : FloatingActionButton(
-            onPressed: () => context.go('/rooms/newprivatechat'),
-            child: const Icon(Icons.chat_outlined),
-          );
+        : StartChatFab();
 
     return PopScope(
       canPop: !controller.isSearchMode && controller.activeSpaceId == null,

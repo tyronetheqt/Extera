@@ -2499,6 +2499,7 @@
 		"type": "String",
 		"placeholders": {}
 	},
+    "deviceIdentityKey": "Открытый ключ устройства",
 	"messageInfo": "Информация о сообщении",
 	"@messageInfo": {},
 	"time": "Время",
