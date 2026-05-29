@@ -27,6 +27,10 @@ class SettingsSecurityView extends StatelessWidget {
     final theme = Theme.of(context);
     final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
 
+    final client = Matrix.of(context).client;
+    final publicMasterKey =
+        client.userDeviceKeys[client.userID]?.masterKey?.publicKey;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(L10n.of(context).security),
@@ -271,9 +275,22 @@ class SettingsSecurityView extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (publicMasterKey != null) ...[
+                            ListTile(
+                              title: Text(L10n.of(context).yourPublicKey),
+                              leading: const Icon(Icons.verified_user_outlined),
+                              subtitle: SelectableText(
+                                publicMasterKey.beautified,
+                                style: const TextStyle(
+                                  fontFamily: 'RobotoMono',
+                                ),
+                              ),
+                            ),
+                            const ListDivider(),
+                          ],
                           ListTile(
-                            title: Text(L10n.of(context).yourPublicKey),
-                            leading: const Icon(Icons.vpn_key_outlined),
+                            title: Text(L10n.of(context).deviceIdentityKey),
+                            leading: const Icon(Icons.mobile_friendly_outlined),
                             subtitle: SelectableText(
                               Matrix.of(
                                 context,

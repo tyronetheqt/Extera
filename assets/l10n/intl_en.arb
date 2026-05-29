@@ -2508,6 +2508,7 @@
     "type": "String",
     "placeholders": {}
   },
+  "deviceIdentityKey": "Device identity key",
   "messageInfo": "Message info",
   "@messageInfo": {},
   "time": "Time",
