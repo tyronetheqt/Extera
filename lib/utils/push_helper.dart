@@ -148,6 +148,7 @@ class PushHelper {
       helper.event = event;
 
       Logs().v('Push helper got notification event of type ${event.type}.');
+
       return helper;
     } catch (e, s) {
       await helper._crashHandler(e, s);
@@ -202,6 +203,10 @@ class PushHelper {
 
       if (event.type == EventTypes.CallHangup) {
         client.backgroundSync = false;
+      }
+
+      if (!client.pushruleEvaluator.match(event).notify) {
+        return;
       }
 
       if (event.type.startsWith('m.call') &&
