@@ -3781,5 +3781,7 @@
       }
     }
   },
-  "owner": "Owner"
+  "owner": "Owner",
+  "interactiveVerification": "Interactive verification",
+  "interactiveVerificationDescription": "If you are next to each other or communicate over a secure channel, then you may verify all devices at once."
 }

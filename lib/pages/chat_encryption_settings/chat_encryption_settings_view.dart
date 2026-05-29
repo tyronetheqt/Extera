@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -42,6 +41,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
           ],
         ),
         body: MaxWidthBody(
+          withoutVisibleBorder: true,
           child: Padding(
             padding: const .symmetric(horizontal: 8),
             child: Column(
@@ -70,6 +70,13 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                   child: Column(
                     children: [
                       if (room.isDirectChat) ...[
+                        const SizedBox(height: 16),
+                        ListTile(
+                          title: Text(L10n.of(context).interactiveVerification),
+                          subtitle: Text(
+                            L10n.of(context).interactiveVerificationDescription,
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: SizedBox(
@@ -81,6 +88,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 8),
                         const ListDivider(),
                       ],
                       if (room.encrypted) ...[
@@ -95,124 +103,101 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                           stream: room.client.onRoomState.stream.where(
                             (update) => update.roomId == controller.room.id,
                           ),
-                          builder: (context, snapshot) => FutureBuilder<List<DeviceKeys>>(
-                            future: room.getUserDeviceKeys(),
-                            builder: (BuildContext context, snapshot) {
-                              if (snapshot.hasError) {
-                                return Center(
-                                  child: Text(
-                                    '${L10n.of(context).oopsSomethingWentWrong}: ${snapshot.error}',
-                                  ),
-                                );
-                              }
-                              if (!snapshot.hasData) {
-                                return const Center(
-                                  child: CircularProgressIndicator.adaptive(
-                                    strokeWidth: 2,
-                                  ),
-                                );
-                              }
-                              final deviceKeys = snapshot.data!;
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: deviceKeys.length,
-                                itemBuilder: (BuildContext context, int i) =>
-                                    Column(
-                                      children: [
-                                        if (i != 0) const ListDivider(),
-                                        SwitchListTile(
-                                          value: !deviceKeys[i].blocked,
-                                          activeThumbColor:
-                                              deviceKeys[i].verified
-                                              ? Colors.green
-                                              : Colors.orange,
-                                          onChanged: (_) => controller
-                                              .toggleDeviceKey(deviceKeys[i]),
-                                          title: Row(
-                                            children: [
-                                              Icon(
-                                                deviceKeys[i].verified
-                                                    ? Icons.verified_outlined
-                                                    : deviceKeys[i].blocked
-                                                    ? Icons.block_outlined
-                                                    : Icons.info_outlined,
-                                                color: deviceKeys[i].verified
+                          builder: (context, snapshot) =>
+                              FutureBuilder<List<DeviceKeys>>(
+                                future: room.getUserDeviceKeys(),
+                                builder: (BuildContext context, snapshot) {
+                                  if (snapshot.hasError) {
+                                    return Center(
+                                      child: Text(
+                                        '${L10n.of(context).oopsSomethingWentWrong}: ${snapshot.error}',
+                                      ),
+                                    );
+                                  }
+                                  if (!snapshot.hasData) {
+                                    return const Center(
+                                      child: CircularProgressIndicator.adaptive(
+                                        strokeWidth: 2,
+                                      ),
+                                    );
+                                  }
+                                  final deviceKeys = snapshot.data!;
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: deviceKeys.length,
+                                    itemBuilder:
+                                        (BuildContext context, int i) => Column(
+                                          children: [
+                                            if (i != 0) const ListDivider(),
+                                            SwitchListTile(
+                                              value: !deviceKeys[i].blocked,
+                                              activeThumbColor:
+                                                  deviceKeys[i].verified
+                                                  ? Colors.green
+                                                  : Colors.orange,
+                                              onChanged: (_) =>
+                                                  controller.toggleDeviceKey(
+                                                    deviceKeys[i],
+                                                  ),
+                                              secondary: CircleAvatar(
+                                                backgroundColor:
+                                                    deviceKeys[i].verified
                                                     ? Colors.green
                                                     : deviceKeys[i].blocked
                                                     ? Colors.red
                                                     : Colors.orange,
-                                                size: 20,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                deviceKeys[i].deviceId ??
-                                                    L10n.of(
-                                                      context,
-                                                    ).unknownDevice,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Flexible(
-                                                fit: FlexFit.loose,
-                                                child: Material(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          AppConfig
-                                                              .borderRadius,
-                                                        ),
-                                                    side: BorderSide(
-                                                      color: theme
-                                                          .colorScheme
-                                                          .primary,
-                                                    ),
-                                                  ),
-                                                  color: theme
-                                                      .colorScheme
-                                                      .primaryContainer,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          4.0,
-                                                        ),
-                                                    child: Text(
-                                                      deviceKeys[i].userId,
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                        color: theme
-                                                            .colorScheme
-                                                            .primary,
-                                                        fontSize: 12,
-                                                        fontStyle:
-                                                            FontStyle.italic,
-                                                      ),
-                                                    ),
-                                                  ),
+                                                child: Icon(
+                                                  deviceKeys[i].verified
+                                                      ? Icons.verified_outlined
+                                                      : deviceKeys[i].blocked
+                                                      ? Icons.block_outlined
+                                                      : Icons.info_outlined,
                                                 ),
                                               ),
-                                            ],
-                                          ),
-                                          subtitle: Text(
-                                            deviceKeys[i]
-                                                    .ed25519Key
-                                                    ?.beautified ??
-                                                L10n.of(
-                                                  context,
-                                                ).unknownEncryptionAlgorithm,
-                                            style: TextStyle(
-                                              fontFamily: 'RobotoMono',
-                                              color:
-                                                  theme.colorScheme.secondary,
+                                              title: Row(
+                                                children: [
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    deviceKeys[i].deviceId ??
+                                                        L10n.of(
+                                                          context,
+                                                        ).unknownDevice,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    'ー ${deviceKeys[i].userId}',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      color: theme.hintColor
+                                                          .withAlpha(128),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              subtitle: Text(
+                                                deviceKeys[i]
+                                                        .ed25519Key
+                                                        ?.beautified ??
+                                                    L10n.of(
+                                                      context,
+                                                    ).unknownEncryptionAlgorithm,
+                                                style: TextStyle(
+                                                  fontFamily: 'RobotoMono',
+                                                  color: theme
+                                                      .colorScheme
+                                                      .secondary,
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                              );
-                            },
-                          ),
+                                  );
+                                },
+                              ),
                         ),
                       ] else
                         Padding(

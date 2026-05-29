@@ -192,7 +192,9 @@ class ImageBubble extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
+            color: event.messageType == MessageTypes.Sticker
+                ? Colors.transparent
+                : theme.colorScheme.surfaceContainerHighest,
             borderRadius: borderRadius,
           ),
           clipBehavior: Clip.hardEdge,
