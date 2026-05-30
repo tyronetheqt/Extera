@@ -3823,7 +3823,7 @@
   },
   "phoneNumber": "Номер телефона",
   "sendVerificationCode": "Отправить код",
-  "verificationCodeSent": "We sent a verification message. Please check your phone and then tap the button below.",
+  "verificationCodeSent": "Мы отправили код подтверждения. Пожалуйста, проверьте свой телефон и нажмите кнопку ниже.",
   "useDifferentNumber": "Использовать другой номер",
   "phoneVerification": "Подтверждение номера",
   "pleaseEnterPhoneNumber": "Введите номер телефона.",
@@ -3853,5 +3853,9 @@
         "engine": {"type": "String"}
     }
   },
-  "owner": "Владелец"
+  "owner": "Владелец",
+  "discardEdits": "Вы уверены, что хотите отменить изменения?",
+  "checkList": "Чеклист",
+  "interactiveVerification": "Интерактивное подтверждение",
+  "interactiveVerificationDescription": "Если вы находитесь рядом или разговариваете по защищённому каналу связи, вы можете подтвердить все устройства."
 }
