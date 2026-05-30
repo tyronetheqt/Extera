@@ -18,6 +18,8 @@ enum AppSettings<T> {
     'xyz.extera.neurogateUrl',
     'https://neurogate.extera.xyz',
   ),
+  textMessageMaxLength<int>('xyz.extera.textMessageMaxLength', 20000),
+  emojiSuggestionLocale<String>('xyz.extera.emojiSuggestionLocale', 'en'),
   neurogateToken<String>('xyz.extera.neurogateToken', ''),
   neurogateTokenExpiry<String>('xyz.extera.neurogateTokenExpiryDate', ''),
   selectedAccount<String>('xyz.extera.selectedAccount', ''),

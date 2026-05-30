@@ -18,9 +18,17 @@ extension VisibleInGuiExtension on List<Event> {
     return where((e) => e.room.threads.containsKey(e.eventId)).toList();
   }
 
-  List<Event> filterByVisibleInGui({String? exceptionEventId}) {
+  List<Event> filterByVisibleInGui({
+    String? exceptionEventId,
+    String? threadId,
+  }) {
     final visibleEvents = where(
-      (e) => e.isVisibleInGui || e.eventId == exceptionEventId,
+      (e) =>
+          (e.isVisibleInGui || e.eventId == exceptionEventId) &&
+          (threadId == null
+              ? e.relationshipType != RelationshipTypes.thread
+              : e.relationshipType == RelationshipTypes.thread &&
+                    e.relationshipEventId == threadId),
     ).toList();
 
     // Hide creation state events:

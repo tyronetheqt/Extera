@@ -488,23 +488,9 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  KeyEventResult _shiftEnterKeyHandling(FocusNode node, KeyEvent evt) {
-    if (!HardwareKeyboard.instance.isShiftPressed &&
-        evt.logicalKey.keyLabel == 'Enter') {
-      if (evt is KeyDownEvent) {
-        send();
-      }
-      return KeyEventResult.handled;
-    } else {
-      return KeyEventResult.ignored;
-    }
-  }
-
   @override
   void initState() {
-    inputFocus = FocusNode(
-      onKeyEvent: AppSettings.sendOnEnter.value ? _shiftEnterKeyHandling : null,
-    );
+    inputFocus = FocusNode(onKeyEvent: _customKeyHandling);
 
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
@@ -1249,11 +1235,9 @@ class ChatController extends State<ChatPageWithRoom>
     if (reason == null || reason.isEmpty) return;
     final result = await showFutureLoadingDialog(
       context: context,
-      future: () => Matrix.of(context).client.reportEvent(
-        event!.roomId!,
-        event.eventId,
-        reason: reason,
-      ),
+      future: () => Matrix.of(
+        context,
+      ).client.reportEvent(event!.roomId!, event.eventId, reason: reason),
     );
     if (result.error != null) return;
     setState(() {
@@ -1664,25 +1648,137 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void editSelectedEventAction({Event? event}) {
-    event ??= selectedEvents.first;
+  void _startEditingEvent(Event event, {bool clearSelection = false}) {
+    final timeline = this.timeline;
+    if (timeline == null) return;
+
     final client = currentRoomBundle.firstWhere(
-      (cl) => event!.senderId == cl!.userID,
+      (c) => c?.userID == event.senderId,
       orElse: () => null,
     );
-    if (client == null) {
-      return;
-    }
+    if (client == null) return;
 
-    final displayEvent = event.getDisplayEvent(timeline!);
     setSendingClient(client);
     setState(() {
       pendingText = sendController.text;
       editEvent = event;
-      sendController.text = displayEvent.calcUnlocalizedBody(hideReply: true);
-      selectedEvents.clear();
+      sendController.text = event
+          .getDisplayEvent(timeline)
+          .calcLocalizedBodyFallback(
+            MatrixLocals(L10n.of(context)),
+            withSenderNamePrefix: false,
+            hideReply: true,
+          );
+      if (clearSelection) selectedEvents.clear();
     });
     inputFocus.requestFocus();
+  }
+
+  KeyEventResult _customKeyHandling(FocusNode node, KeyEvent evt) {
+    if (evt is KeyDownEvent &&
+        evt.logicalKey == LogicalKeyboardKey.arrowUp &&
+        !PlatformInfos.isMobile &&
+        editEvent == null &&
+        replyEvent == null &&
+        sendController.text.isEmpty) {
+      editLastSentMessage();
+      return KeyEventResult.handled;
+    }
+
+    if (evt is KeyDownEvent &&
+        evt.logicalKey == LogicalKeyboardKey.escape &&
+        editEvent != null) {
+      cancelEditWithConfirmation();
+      return KeyEventResult.handled;
+    }
+
+    if (!HardwareKeyboard.instance.isShiftPressed &&
+        evt.logicalKey.keyLabel == 'Enter' &&
+        AppSettings.sendOnEnter.value) {
+      if (evt is KeyDownEvent) {
+        send();
+      }
+      return KeyEventResult.handled;
+    } else if (evt.logicalKey.keyLabel == 'Enter' && evt is KeyDownEvent) {
+      final currentLineNum =
+          sendController.text
+              .substring(0, sendController.selection.baseOffset)
+              .split('\n')
+              .length -
+          1;
+      final currentLine = sendController.text.split('\n')[currentLineNum];
+
+      for (final pattern in [
+        '- [ ] ',
+        '- [x] ',
+        '* [ ] ',
+        '* [x] ',
+        '- ',
+        '* ',
+        '+ ',
+      ]) {
+        if (currentLine.startsWith(pattern)) {
+          if (currentLine == pattern) {
+            return KeyEventResult.ignored;
+          }
+          sendController.text += '\n$pattern';
+          return KeyEventResult.handled;
+        }
+      }
+
+      return KeyEventResult.ignored;
+    } else {
+      return KeyEventResult.ignored;
+    }
+  }
+
+  void editSelectedEventAction({Event? event}) {
+    _startEditingEvent(event ?? selectedEvents.first, clearSelection: true);
+  }
+
+  void editLastSentMessage() {
+    final timeline = this.timeline;
+    if (timeline == null) return;
+
+    final events = timeline.events.filterByVisibleInGui(
+      threadId: threadRootEventId,
+    );
+
+    final lastOwnMessage = events.firstWhereOrNull(
+      (e) =>
+          e.type == EventTypes.Message &&
+          e.messageType == MessageTypes.Text &&
+          e.status.isSent &&
+          !e.redacted &&
+          currentRoomBundle.any((c) => c?.userID == e.senderId),
+    );
+
+    if (lastOwnMessage == null) return;
+
+    _startEditingEvent(lastOwnMessage);
+  }
+
+  Future<void> cancelEditWithConfirmation() async {
+    final originalText = editEvent!
+        .getDisplayEvent(timeline!)
+        .calcLocalizedBodyFallback(
+          MatrixLocals(L10n.of(context)),
+          withSenderNamePrefix: false,
+          hideReply: true,
+        );
+
+    if (sendController.text != originalText) {
+      final result = await showOkCancelAlertDialog(
+        context: context,
+        title: L10n.of(context).areYouSure,
+        message: L10n.of(context).discardEdits,
+        okLabel: L10n.of(context).ok,
+        cancelLabel: L10n.of(context).cancel,
+      );
+      if (result == OkCancelResult.cancel) return;
+    }
+
+    cancelReplyEventAction();
   }
 
   void goToNewRoomAction() async {
