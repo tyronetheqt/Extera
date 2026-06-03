@@ -499,6 +499,33 @@ class _MessageBubbleState extends State<MessageBubble> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: rowMainAxisAlignment,
               children: [
+                if (widget.longPressSelect)
+                  SizedBox(
+                    height: 32,
+                    width: Avatar.defaultSize,
+                    child: Checkbox.adaptive(
+                      value: widget.selected,
+                      shape: const CircleBorder(),
+                      onChanged: (_) => widget.onSelect(event, null),
+                    ),
+                  )
+                else if (ownMessage)
+                  SizedBox(
+                    width: Avatar.defaultSize,
+                    child: Center(
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: event.status == EventStatus.error
+                            ? const Icon(Icons.error, color: Colors.red)
+                            : event.fileSendingStatus != null
+                            ? const CircularProgressIndicator.adaptive(
+                                strokeWidth: 1,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
                 if (ownMessage && event.type == EventTypes.Sticker)
                   replyDisplay,
                 Expanded(
