@@ -3,10 +3,12 @@ import 'dart:ui' as ui;
 
 import 'package:extera_next/pages/chat/events/file_sending_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:pro_image_editor/plugins/defer_pointer/defer_pointer.dart';
 import 'package:swipe_to_action/swipe_to_action.dart';
 
 import 'package:extera_next/config/setting_keys.dart';
@@ -272,18 +274,17 @@ class _MessageBubbleState extends State<MessageBubble> {
           : roundedCorner,
     );
     final noBubble =
-        ({
-              MessageTypes.Video,
-              MessageTypes.Image,
-              MessageTypes.Sticker,
-            }.contains(event.messageType) &&
-            event.fileDescription == null &&
-            !event.redacted) ||
+        (event.messageType == MessageTypes.Sticker && !event.redacted) ||
         (event.messageType == MessageTypes.Text &&
             event.relationshipType == null &&
             event.onlyEmotes &&
             event.numberEmotes > 0 &&
             event.numberEmotes <= 3);
+
+    final onlyMedia =
+        {MessageTypes.Image, MessageTypes.Video}.contains(event.messageType) &&
+        event.fileDescription == null &&
+        !event.redacted;
 
     if (ownMessage) {
       color = displayEvent.status.isError
@@ -365,6 +366,56 @@ class _MessageBubbleState extends State<MessageBubble> {
       child: buildStatusRow(color: Colors.white),
     );
 
+    final replyDisplay = _replyEventFuture != null
+        ? FutureBuilder<Event?>(
+            future: _replyEventFuture,
+            builder: (BuildContext context, snapshot) {
+              final replyEvent = snapshot.hasData
+                  ? snapshot.data!
+                  : Event(
+                      eventId: event.inReplyToEventId() ?? '\$fake_event_id',
+                      content: {'msgtype': 'm.text', 'body': '...'},
+                      senderId: event.senderId,
+                      type: 'm.room.message',
+                      room: event.room,
+                      status: .error,
+                      originServerTs: DateTime.now(),
+                    );
+              return Padding(
+                padding: .only(
+                  left: 8,
+                  right: 8,
+                  top: 10,
+                  bottom:
+                      noBubble ||
+                          (event.messageType != MessageTypes.Text &&
+                              event.messageType != MessageTypes.Notice)
+                      ? 8
+                      : 0,
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    AppConfig.borderRadius - 10,
+                  ),
+                  onTap: () => _scrollToEvent(replyEvent, event),
+                  child: AbsorbPointer(
+                    child: Padding(
+                      // I did this intentionally
+                      padding: const .symmetric(horizontal: 8),
+                      child: ReplyContent(
+                        replyEvent,
+                        noBubble: noBubble,
+                        ownMessage: ownMessage,
+                        timeline: timeline,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+        : const SizedBox.shrink();
+
     // Decide where to place the status row.
     //
     // - inline (Telegram-style): for plain-text messages we append an invisible
@@ -388,10 +439,11 @@ class _MessageBubbleState extends State<MessageBubble> {
 
     final useInlineStatus =
         !noBubble &&
+        !onlyMedia &&
         (isTextLike || event.fileDescription != null) &&
         !event.redacted;
 
-    final useChipStatus = noBubble && !isBigEmote;
+    final useChipStatus = (noBubble || onlyMedia) && !isBigEmote;
     final useBottomChipStatus = isBigEmote;
     final useBottomRowStatus =
         !useInlineStatus && !useChipStatus && !useBottomChipStatus;
@@ -447,47 +499,8 @@ class _MessageBubbleState extends State<MessageBubble> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: rowMainAxisAlignment,
               children: [
-                if (widget.longPressSelect)
-                  SizedBox(
-                    height: 32,
-                    width: Avatar.defaultSize,
-                    child: Checkbox.adaptive(
-                      value: widget.selected,
-                      shape: const CircleBorder(),
-                      onChanged: (_) => widget.onSelect(event, null),
-                    ),
-                  )
-                else if (nextEventSameSender || ownMessage)
-                  SizedBox(
-                    width: Avatar.defaultSize,
-                    child: Center(
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: event.status == EventStatus.error
-                            ? const Icon(Icons.error, color: Colors.red)
-                            : event.fileSendingStatus != null
-                            ? const CircularProgressIndicator.adaptive(
-                                strokeWidth: 1,
-                              )
-                            : null,
-                      ),
-                    ),
-                  )
-                else
-                  Avatar(
-                    mxContent: user.avatarUrl,
-                    name: user.calcDisplayname(),
-                    onTap: () => showMemberActionsPopupMenu(
-                      context: context,
-                      user: user,
-                      onMention: widget.onMention,
-                    ),
-                    presenceUserId: user.stateKey,
-                    presenceBackgroundColor: widget.wallpaperMode
-                        ? Colors.transparent
-                        : null,
-                  ),
+                if (ownMessage && event.type == EventTypes.Sticker)
+                  replyDisplay,
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -495,13 +508,13 @@ class _MessageBubbleState extends State<MessageBubble> {
                     children: [
                       if (!nextEventSameSender)
                         Padding(
-                          padding: const EdgeInsets.only(left: 8.0, bottom: 4),
+                          padding: const .only(left: 40.0, bottom: 3),
                           child: ownMessage || event.room.isDirectChat
                               ? const SizedBox(height: 12)
                               : Text(
                                   displayname,
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: (theme.brightness == Brightness.light
                                         ? displayname.color
@@ -520,207 +533,199 @@ class _MessageBubbleState extends State<MessageBubble> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                         ),
-                      Container(
-                        alignment: alignment,
-                        padding: const EdgeInsets.only(left: 8),
-                        child: GestureDetector(
-                          onTapDown: (details) =>
-                              _tapPosition = details.globalPosition,
-                          onLongPress: widget.longPressSelect
-                              ? null
-                              : () {
-                                  HapticFeedback.heavyImpact();
-                                  widget.onSelect(event, _tapPosition);
-                                },
-                          child: Material(
-                            color: noBubble
-                                ? Colors.transparent
-                                : AppSettings.enableChatFrostedGlass.value &&
-                                      AppSettings.wallpaperPath.value.isNotEmpty
-                                ? color.withValues(alpha: 0.7)
-                                : color,
-                            borderRadius: borderRadius,
-                            clipBehavior: Clip.hardEdge,
-                            child: BubbleBackground(
-                              colors: widget.colors,
-                              ignore:
-                                  noBubble ||
-                                  !ownMessage ||
-                                  !widget.gradient ||
-                                  MediaQuery.highContrastOf(context),
-                              scrollController: widget.scrollController,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    AppConfig.borderRadius,
-                                  ),
-                                ),
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      (_replyEventFuture != null
-                                          ? _calculateMediaWidth(displayEvent)
-                                          : null) ??
-                                      FluffyThemes.columnWidth * 1.5,
-                                ),
-                                child: Column(
-                                  mainAxisSize: .min,
-                                  crossAxisAlignment: .start,
-                                  children: <Widget>[
-                                    Stack(
-                                      children: [
-                                        Column(
+                      DeferredPointerHandler(
+                        child: Padding(
+                          padding: .only(left: ownMessage ? 0 : 16),
+                          child: Stack(
+                            clipBehavior: .none,
+                            children: [
+                              Container(
+                                alignment: alignment,
+                                padding: const .only(left: 8),
+                                child: GestureDetector(
+                                  onTapDown: (details) =>
+                                      _tapPosition = details.globalPosition,
+                                  onLongPress: widget.longPressSelect
+                                      ? null
+                                      : () {
+                                          HapticFeedback.heavyImpact();
+                                          widget.onSelect(event, _tapPosition);
+                                        },
+                                  child: Material(
+                                    color: noBubble
+                                        ? Colors.transparent
+                                        : AppSettings
+                                                  .enableChatFrostedGlass
+                                                  .value &&
+                                              AppSettings
+                                                  .wallpaperPath
+                                                  .value
+                                                  .isNotEmpty
+                                        ? color.withValues(alpha: 0.7)
+                                        : color,
+                                    borderRadius: borderRadius,
+                                    clipBehavior: Clip.hardEdge,
+                                    child: BubbleBackground(
+                                      colors: widget.colors,
+                                      ignore:
+                                          noBubble ||
+                                          !ownMessage ||
+                                          !widget.gradient ||
+                                          MediaQuery.highContrastOf(context),
+                                      scrollController: widget.scrollController,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            AppConfig.borderRadius,
+                                          ),
+                                        ),
+                                        constraints: BoxConstraints(
+                                          maxWidth:
+                                              (_replyEventFuture != null
+                                                  ? _calculateMediaWidth(
+                                                      displayEvent,
+                                                    )
+                                                  : null) ??
+                                              FluffyThemes.columnWidth * 1.5,
+                                        ),
+                                        child: Column(
                                           mainAxisSize: .min,
-                                          crossAxisAlignment:
-                                              ownMessage && noBubble
-                                              ? .end
-                                              : .start,
-                                          children: [
-                                            if (_replyEventFuture != null)
-                                              FutureBuilder<Event?>(
-                                                future: _replyEventFuture,
-                                                builder: (BuildContext context, snapshot) {
-                                                  final replyEvent =
-                                                      snapshot.hasData
-                                                      ? snapshot.data!
-                                                      : Event(
-                                                          eventId:
-                                                              event
-                                                                  .inReplyToEventId() ??
-                                                              '\$fake_event_id',
-                                                          content: {
-                                                            'msgtype': 'm.text',
-                                                            'body': '...',
-                                                          },
-                                                          senderId:
-                                                              event.senderId,
-                                                          type:
-                                                              'm.room.message',
-                                                          room: event.room,
-                                                          status: .error,
-                                                          originServerTs:
-                                                              DateTime.now(),
-                                                        );
-                                                  return Padding(
-                                                    padding: .only(
-                                                      left: 16,
-                                                      right: 16,
-                                                      top: 8,
-                                                      bottom:
-                                                          noBubble ||
-                                                              (event.messageType !=
-                                                                      MessageTypes
-                                                                          .Text &&
-                                                                  event.messageType !=
-                                                                      MessageTypes
-                                                                          .Notice)
-                                                          ? 8
-                                                          : 0,
-                                                    ),
-                                                    child: Material(
-                                                      color: Colors.transparent,
-                                                      borderRadius: ReplyContent
-                                                          .borderRadius,
-                                                      child: InkWell(
+                                          crossAxisAlignment: .start,
+                                          children: <Widget>[
+                                            Stack(
+                                              children: [
+                                                Column(
+                                                  mainAxisSize: .min,
+                                                  crossAxisAlignment:
+                                                      ownMessage && noBubble
+                                                      ? .end
+                                                      : .start,
+                                                  children: [
+                                                    if (event.type !=
+                                                        EventTypes.Sticker)
+                                                      replyDisplay,
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                        top:
+                                                            {
+                                                              MessageTypes.Text,
+                                                              MessageTypes
+                                                                  .Emote,
+                                                              MessageTypes
+                                                                  .Notice,
+                                                            }.contains(
+                                                              event.messageType,
+                                                            )
+                                                            ? 8
+                                                            : 0,
+                                                        bottom: useInlineStatus
+                                                            ? 8
+                                                            : 0,
+                                                      ),
+                                                      child: MessageContent(
+                                                        displayEvent,
+                                                        textColor: textColor,
+                                                        linkColor: linkColor,
+                                                        onInfoTab:
+                                                            widget.onInfoTab,
                                                         borderRadius:
-                                                            ReplyContent
-                                                                .borderRadius,
-                                                        onTap: () =>
-                                                            _scrollToEvent(
-                                                              replyEvent,
-                                                              event,
-                                                            ),
-                                                        child: AbsorbPointer(
-                                                          child: ReplyContent(
-                                                            replyEvent,
-                                                            noBubble: noBubble,
-                                                            ownMessage:
-                                                                ownMessage,
-                                                            timeline: timeline,
-                                                          ),
-                                                        ),
+                                                            borderRadius,
+                                                        timeline: timeline,
+                                                        loadMedia: loadMedia,
+                                                        onLoadMedia: () {
+                                                          setState(() {
+                                                            loadMedia = true;
+                                                          });
+                                                        },
+                                                        nextEventSameSender:
+                                                            nextEventSameSender,
+                                                        previousEventSameSender:
+                                                            previousEventSameSender,
+                                                        ownMessage: ownMessage,
+                                                        useBubbleLayout: true,
+                                                        selectable:
+                                                            PlatformInfos
+                                                                .isMobile
+                                                            ? widget
+                                                                  .longPressSelect
+                                                            : true,
+                                                        trailingSpan:
+                                                            useInlineStatus
+                                                            ? inlineStatusPlaceholder
+                                                            : null,
                                                       ),
                                                     ),
-                                                  );
-                                                },
-                                              ),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                top:
-                                                    {
-                                                      MessageTypes.Text,
-                                                      MessageTypes.Emote,
-                                                      MessageTypes.Notice,
-                                                    }.contains(
-                                                      event.messageType,
-                                                    )
-                                                    ? 8
-                                                    : 0,
-                                                bottom: useInlineStatus ? 8 : 0,
-                                              ),
-                                              child: MessageContent(
-                                                displayEvent,
-                                                textColor: textColor,
-                                                linkColor: linkColor,
-                                                onInfoTab: widget.onInfoTab,
-                                                borderRadius: borderRadius,
-                                                timeline: timeline,
-                                                loadMedia: loadMedia,
-                                                onLoadMedia: () {
-                                                  setState(() {
-                                                    loadMedia = true;
-                                                  });
-                                                },
-                                                useBubbleLayout: true,
-                                                selectable:
-                                                    PlatformInfos.isMobile
-                                                    ? widget.longPressSelect
-                                                    : true,
-                                                trailingSpan: useInlineStatus
-                                                    ? inlineStatusPlaceholder
-                                                    : null,
-                                              ),
+                                                    // reserve vertical space for bottomrowstatus
+                                                    if (useBottomRowStatus)
+                                                      const SizedBox(
+                                                        height: 22,
+                                                      ),
+                                                    if (useBottomChipStatus)
+                                                      Padding(
+                                                        padding: const .only(
+                                                          top: 4,
+                                                          left: 4,
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            messageStatusChip,
+                                                          ],
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                                if (useInlineStatus)
+                                                  Positioned(
+                                                    bottom: 10,
+                                                    right: 16,
+                                                    child: messageStatusRow,
+                                                  ),
+                                                if (useBottomRowStatus)
+                                                  Positioned(
+                                                    bottom: 6,
+                                                    right: 12,
+                                                    child: messageStatusRow,
+                                                  ),
+                                                if (useChipStatus)
+                                                  Positioned(
+                                                    bottom: 6,
+                                                    right: 6,
+                                                    child: messageStatusChip,
+                                                  ),
+                                              ],
                                             ),
-                                            // reserve vertical space for bottomrowstatus
-                                            if (useBottomRowStatus)
-                                              const SizedBox(height: 22),
-                                            if (useBottomChipStatus)
-                                              Padding(
-                                                padding: const .only(
-                                                  top: 4,
-                                                  left: 4,
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [messageStatusChip],
-                                                ),
-                                              ),
                                           ],
                                         ),
-                                        if (useInlineStatus)
-                                          Positioned(
-                                            bottom: 10,
-                                            right: 16,
-                                            child: messageStatusRow,
-                                          ),
-                                        if (useBottomRowStatus)
-                                          Positioned(
-                                            bottom: 6,
-                                            right: 12,
-                                            child: messageStatusRow,
-                                          ),
-                                        if (useChipStatus)
-                                          Positioned(
-                                            bottom: 6,
-                                            right: 6,
-                                            child: messageStatusChip,
-                                          ),
-                                      ],
+                                      ),
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
+                              if (!ownMessage && !nextEventSameSender)
+                                Positioned(
+                                  left: -16,
+                                  top: -24,
+                                  width: 36,
+                                  height: 36,
+                                  child: DeferPointer(
+                                    child: Avatar(
+                                      mxContent: user.avatarUrl,
+                                      name: user.calcDisplayname(),
+                                      size: 36,
+                                      // backgroundColor: Colors.transparent,
+                                      onTap: () => showMemberActionsPopupMenu(
+                                        context: context,
+                                        user: user,
+                                        onMention: widget.onMention,
+                                      ),
+                                      // presenceUserId: user.stateKey,
+                                      // presenceBackgroundColor: Colors.transparent,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -783,6 +788,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                     ],
                   ),
                 ),
+                if (!ownMessage && event.type == EventTypes.Sticker)
+                  replyDisplay,
               ],
             ),
           ],
@@ -837,7 +844,7 @@ class _MessageBubbleState extends State<MessageBubble> {
             Padding(
               padding: EdgeInsets.only(
                 top: 4.0,
-                left: (ownMessage ? 0 : Avatar.defaultSize) + 12.0,
+                left: ownMessage ? 12 : 24,
                 right: ownMessage ? 0 : 12.0,
               ),
               child: MessageReactions(event, timeline),

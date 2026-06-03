@@ -9,7 +9,7 @@ import 'chat.dart';
 import 'events/reply_content.dart';
 
 class ReplyDisplay extends StatelessWidget {
-  static const double height = 56.0;
+  static const double height = 64.0;
 
   final ChatController controller;
   const ReplyDisplay(this.controller, {super.key});
@@ -36,9 +36,13 @@ class ReplyDisplay extends StatelessWidget {
           ),
           Expanded(
             child: controller.replyEvent != null
-                ? ReplyContent(
-                    controller.replyEvent!,
-                    timeline: controller.timeline,
+                ? Padding(
+                    padding: const .symmetric(vertical: 4),
+                    child: ReplyContent(
+                      controller.replyEvent!,
+                      noBubble: true,
+                      timeline: controller.timeline,
+                    ),
                   )
                 : _EditContent(
                     controller.editEvent?.getDisplayEvent(controller.timeline!),

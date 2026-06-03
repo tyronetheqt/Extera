@@ -5,7 +5,6 @@ import 'package:matrix/matrix.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import '../../../config/app_config.dart';
 
 class ReplyContent extends StatelessWidget {
   final Event replyEvent;
@@ -22,11 +21,6 @@ class ReplyContent extends StatelessWidget {
     super.key,
     this.timeline,
   });
-
-  static const BorderRadius borderRadius = BorderRadius.only(
-    topRight: Radius.circular(AppConfig.borderRadius / 2),
-    bottomRight: Radius.circular(AppConfig.borderRadius / 2),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -49,22 +43,22 @@ class ReplyContent extends StatelessWidget {
         ? theme.colorScheme.tertiaryContainer
         : theme.colorScheme.tertiary;
 
-    return Material(
-      color: Colors.transparent,
-      borderRadius: borderRadius,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            width: 5,
-            height: fontSize * 2 + 16,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-              color: color,
-            ),
+    return Row(
+      mainAxisSize: .min,
+      spacing: 2,
+      children: [
+        Container(
+          width: 5,
+          height: fontSize * 2 + 18,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(width: 6),
-          Flexible(
+        ),
+        Flexible(
+          fit: .loose,
+          child: Padding(
+            padding: const .symmetric(horizontal: 6, vertical: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -74,7 +68,9 @@ class ReplyContent extends StatelessWidget {
                   future: displayEvent.fetchSenderUser(),
                   builder: (context, snapshot) {
                     return Text(
-                      '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
+                      snapshot.data?.calcDisplayname() ??
+                          displayEvent.senderFromMemoryOrFallback
+                              .calcDisplayname(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -105,9 +101,8 @@ class ReplyContent extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 6),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

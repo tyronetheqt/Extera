@@ -38,6 +38,10 @@ class MessageContent extends StatelessWidget {
   final bool selectable;
   final bool useBubbleLayout;
 
+  final bool ownMessage;
+  final bool previousEventSameSender;
+  final bool nextEventSameSender;
+
   final bool loadMedia;
   final void Function()? onLoadMedia;
 
@@ -53,6 +57,9 @@ class MessageContent extends StatelessWidget {
     required this.textColor,
     required this.linkColor,
     required this.borderRadius,
+    this.ownMessage = false,
+    this.previousEventSameSender = false,
+    this.nextEventSameSender = false,
     this.useBubbleLayout = true,
     this.selectable = false,
     this.loadMedia = false,
@@ -171,13 +178,16 @@ class MessageContent extends StatelessWidget {
               width: bubbleWidth,
               imageWidth: imageWidth,
               fit: fit,
-              borderRadius: borderRadius,
+              // borderRadius: borderRadius,
               timeline: timeline,
               textColor: textColor,
               linkColor: linkColor,
               loadMedia: loadMedia,
               trailingSpan: trailingSpan,
               onLoadMedia: onLoadMedia,
+              ownMessage: ownMessage,
+              nextEventSameSender: nextEventSameSender,
+              previousEventSameSender: previousEventSameSender,
             );
           case CuteEventContent.eventType:
             return CuteContent(event);
@@ -207,9 +217,11 @@ class MessageContent extends StatelessWidget {
               textColor,
               linkColor,
               timeline: timeline,
-              borderRadius: borderRadius,
               loadThumbnail: loadMedia,
               trailingSpan: trailingSpan,
+              ownMessage: ownMessage,
+              nextEventSameSender: nextEventSameSender,
+              previousEventSameSender: previousEventSameSender,
             );
           case MessageTypes.File:
             return MessageDownloadContent(
@@ -250,8 +262,7 @@ class MessageContent extends StatelessWidget {
                     fontSize:
                         AppSettings.fontSizeFactor.value *
                         AppSettings.messageFontSize.value,
-                    decoration: TextDecoration.underline,
-                    decorationColor: linkColor,
+                    decoration: .none,
                   ),
                   onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
                   onCopy: () {
@@ -340,8 +351,7 @@ class MessageContent extends StatelessWidget {
             final messageLinkStyle = TextStyle(
               color: linkColor,
               fontSize: fontSize,
-              decoration: TextDecoration.underline,
-              decorationColor: linkColor,
+              decoration: TextDecoration.none,
             );
             final spanChildren = <InlineSpan>[
               ...?buildTextSpanChildren(

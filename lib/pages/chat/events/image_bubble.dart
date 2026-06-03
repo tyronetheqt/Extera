@@ -28,9 +28,12 @@ class ImageBubble extends StatelessWidget {
   final double? imageWidth;
   final double height;
   final void Function()? onTap;
-  final BorderRadius? borderRadius;
   final Timeline? timeline;
   final InlineSpan? trailingSpan;
+
+  final bool ownMessage;
+  final bool previousEventSameSender;
+  final bool nextEventSameSender;
 
   final bool loadMedia;
   final void Function()? onLoadMedia;
@@ -45,8 +48,10 @@ class ImageBubble extends StatelessWidget {
     this.imageWidth,
     this.height = 512,
     this.animated = false,
+    this.ownMessage = false,
+    this.previousEventSameSender = false,
+    this.nextEventSameSender = false,
     this.onTap,
-    this.borderRadius,
     this.timeline,
     this.textColor,
     this.linkColor,
@@ -160,8 +165,10 @@ class ImageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    var borderRadius =
-        this.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
+    final hardCorner = Radius.circular(2);
+    final roundedCorner = Radius.circular(AppConfig.borderRadius - 2);
+
+    var borderRadius = BorderRadius.all(roundedCorner);
 
     final fileDescription = event.fileDescription == null
         ? null
@@ -171,55 +178,72 @@ class ImageBubble extends StatelessWidget {
               .replaceAll('<', '&lt;')
               .replaceAll('>', '&gt;');
     final textColor = this.textColor;
+    
+    if (ownMessage) {
+      borderRadius = borderRadius.copyWith(
+        topRight: nextEventSameSender ? hardCorner : roundedCorner,
+        bottomRight: previousEventSameSender ? hardCorner : roundedCorner,
+      );
+    } else {
+      borderRadius = borderRadius.copyWith(
+        topLeft: nextEventSameSender ? hardCorner : roundedCorner,
+        bottomLeft: previousEventSameSender ? hardCorner : roundedCorner,
+      );
+    }
 
     if (fileDescription != null) {
       borderRadius = borderRadius.copyWith(
-        bottomLeft: Radius.zero,
-        bottomRight: Radius.zero,
+        bottomLeft: hardCorner,
+        bottomRight: hardCorner,
       );
     }
 
     if (event.inReplyToEventId(includingFallback: false) != null &&
         fileDescription != null) {
       borderRadius = borderRadius.copyWith(
-        topLeft: Radius.zero,
-        topRight: Radius.zero,
+        topLeft: hardCorner,
+        topRight: hardCorner,
       );
     }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 8,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: event.messageType == MessageTypes.Sticker
-                ? Colors.transparent
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: borderRadius,
-          ),
-          clipBehavior: Clip.hardEdge,
-          width: width,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: width, maxHeight: height),
-            child: AspectRatio(
-              aspectRatio: _aspectRatio,
-              child: InkWell(
-                onTap: () => _onTap(context),
-                child: Hero(
-                  tag: event.eventId,
-                  child: loadMedia
-                      ? MxcImage(
-                          event: event,
-                          width: _effectiveImageWidth,
-                          height: _effectiveImageHeight,
-                          fit: fit,
-                          animated: animated,
-                          isThumbnail: thumbnailOnly,
-                          placeholder: event.messageType == MessageTypes.Sticker
-                              ? null
-                              : _buildPlaceholder,
-                        )
-                      : _buildUnloaded(context),
+        Padding(
+          padding: const .all(2),
+          child: Container(
+            decoration: BoxDecoration(
+              color: event.messageType == MessageTypes.Sticker
+                  ? Colors.transparent
+                  : theme.colorScheme.surfaceContainerHighest,
+              borderRadius: borderRadius,
+            ),
+            clipBehavior: Clip.antiAlias,
+            width: width,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: width, maxHeight: height),
+              child: AspectRatio(
+                aspectRatio: _aspectRatio,
+                child: InkWell(
+                  onTap: () => _onTap(context),
+                  child: Hero(
+                    tag: event.eventId,
+                    child: loadMedia
+                        ? MxcImage(
+                            event: event,
+                            width: _effectiveImageWidth,
+                            height: _effectiveImageHeight,
+                            fit: fit,
+                            animated: animated,
+                            isThumbnail: thumbnailOnly,
+                            placeholder:
+                                event.messageType == MessageTypes.Sticker
+                                ? null
+                                : _buildPlaceholder,
+                          )
+                        : _buildUnloaded(context),
+                  ),
                 ),
               ),
             ),

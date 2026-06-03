@@ -331,23 +331,17 @@ class _MessageModernState extends State<MessageModern> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (!nextEventSameSender)
-                          Row(
-                            children: [
-                              Text(
-                                displayname,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: (theme.brightness == Brightness.light
-                                      ? displayname.color
-                                      : displayname.lightColorText),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(width: 8),
-                              messageStatusRow,
-                            ],
+                          Text(
+                            displayname,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: (theme.brightness == Brightness.light
+                                  ? displayname.color
+                                  : displayname.lightColorText),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         const SizedBox(height: 4),
                         GestureDetector(
@@ -387,8 +381,9 @@ class _MessageModernState extends State<MessageModern> {
                                       child: Material(
                                         color: Colors.transparent,
                                         child: InkWell(
-                                          borderRadius:
-                                              ReplyContent.borderRadius,
+                                          borderRadius: BorderRadius.circular(
+                                            AppConfig.borderRadius - 10,
+                                          ),
                                           onTap: () =>
                                               _scrollToEvent(replyEvent, event),
                                           child: AbsorbPointer(

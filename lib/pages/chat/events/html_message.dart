@@ -712,7 +712,7 @@ class MatrixPill extends StatelessWidget {
               style: TextStyle(
                 color: color,
                 decorationColor: color,
-                decoration: TextDecoration.underline,
+                decoration: .underline,
                 fontSize: fontSize,
                 height: 1.25,
               ),
@@ -722,7 +722,7 @@ class MatrixPill extends StatelessWidget {
                   style: TextStyle(
                     color: color,
                     decorationColor: color,
-                    decoration: TextDecoration.underline,
+                    decoration: .underline,
                     fontSize: fontSize,
                     height: 1.25,
                   ),

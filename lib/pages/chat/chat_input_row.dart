@@ -13,6 +13,7 @@ import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import '../../config/themes.dart';
+import '../../config/app_config.dart';
 import 'chat.dart';
 import 'input_bar.dart';
 
@@ -121,7 +122,9 @@ class ChatInputRow extends StatelessWidget {
                         : height,
                     height: height,
                     alignment: Alignment.center,
-                    decoration: const BoxDecoration(),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                    ),
                     clipBehavior: Clip.hardEdge,
                     child: PopupMenuButton<String>(
                       useRootNavigator: false,
