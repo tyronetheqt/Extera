@@ -74,7 +74,6 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         : (1.0 - (shrinkOffset / _searchBarHeight)).clamp(0.0, 1.0);
 
     return Material(
-      elevation: shrinkOffset > 0 ? 4 : 0,
       surfaceTintColor: theme.colorScheme.surfaceTint,
       color: theme.colorScheme.surface,
       child: Padding(
