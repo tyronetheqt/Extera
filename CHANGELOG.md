@@ -1,3 +1,10 @@
+## Extera 26.2.8
+- Add another version of bubble message layout (old one still available)
+- Add status row to modern message layout
+- Remove elevation for chat list appbar
+- Right-click on a reaction now shows who reacted
+- Remove links underline
+
 ## Extera 26.2.7
 - Modern message layout
 - Bugfixes
