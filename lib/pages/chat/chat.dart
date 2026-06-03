@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:extera_next/pages/chat/events/message.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -126,8 +127,8 @@ class ChatController extends State<ChatPageWithRoom>
       sendingClient.getRoomById(roomId)?.threads[threadRootEventId] ??
       widget.room.threads[threadRootEventId];
 
-  bool _useBubbleLayout = true;
-  bool get useBubbleLayout => _useBubbleLayout;
+  MessageLayout _layout = .bubbles;
+  MessageLayout get layout => _layout;
 
   late Client sendingClient;
 
@@ -505,7 +506,12 @@ class ChatController extends State<ChatPageWithRoom>
       AppSettings.displayChatDetailsColumn.value,
     );
 
-    _useBubbleLayout = AppSettings.messageStyle.value == 'bubbles';
+    _layout = switch (AppSettings.messageStyle.value) {
+      'bubbles' => .bubbles,
+      'bubbles_legacy' => .bubblesLegacy,
+      'modern' => .modern,
+      _ => .bubbles,
+    };
     sendingClient = Matrix.of(context).client;
     readMarkerEventId = room.hasNewMessages ? room.fullyRead : '';
     WidgetsBinding.instance.addObserver(this);

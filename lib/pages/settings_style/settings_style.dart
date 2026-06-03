@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:extera_next/pages/chat/events/message.dart';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
@@ -90,6 +91,16 @@ class SettingsStyleController extends State<SettingsStyle> {
   void initState() {
     super.initState();
     _loadWallpaperConfig();
+    _loadMessageStyleSetting();
+  }
+
+  void _loadMessageStyleSetting() {
+    _messageStyle = switch (AppSettings.messageStyle.value) {
+      'bubbles' => .bubbles,
+      'bubbles_legacy' => .bubblesLegacy,
+      'modern' => .modern,
+      _ => .bubbles,
+    };
   }
 
   Future<void> _loadWallpaperConfig() async {
@@ -274,11 +285,17 @@ class SettingsStyleController extends State<SettingsStyle> {
     setState(() {});
   }
 
-  String get messageStyle => AppSettings.messageStyle.value;
+  MessageLayout _messageStyle = .bubbles;
+  MessageLayout get messageStyle => _messageStyle;
 
-  void setMessageStyle(String value) {
+  void setMessageStyle(MessageLayout value) {
     setState(() {
-      AppSettings.messageStyle.setItem(value);
+      AppSettings.messageStyle.setItem(switch (value) {
+        .bubbles => 'bubbles',
+        .bubblesLegacy => 'bubbles_legacy',
+        .modern => 'modern',
+      });
+      _messageStyle = value;
     });
   }
 

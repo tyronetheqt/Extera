@@ -273,9 +273,14 @@ class SettingsStyleView extends StatelessWidget {
                                             eventId: 'style_dummy_1',
                                             content: {
                                               'msgtype': 'm.text',
-                                              'body': L10n.of(context).settingsStyleMessage1,
-                                              'format': 'org.matrix.custom.html',
-                                              'formatted_body': L10n.of(context).settingsStyleMessage1,
+                                              'body': L10n.of(
+                                                context,
+                                              ).settingsStyleMessage1,
+                                              'format':
+                                                  'org.matrix.custom.html',
+                                              'formatted_body': L10n.of(
+                                                context,
+                                              ).settingsStyleMessage1,
                                             },
                                             originServerTs: DateTime.now(),
                                             senderId: client.userID!,
@@ -302,16 +307,21 @@ class SettingsStyleView extends StatelessWidget {
                                             theme.secondaryBubbleColor,
                                             theme.bubbleColor,
                                           ],
-                                          useBubbleLayout: controller.messageStyle == 'bubbles',
+                                          layout: controller.messageStyle,
                                         ),
                                         Message(
                                           Event(
                                             eventId: 'style_dummy_2',
                                             content: {
                                               'msgtype': 'm.text',
-                                              'body': L10n.of(context).settingsStyleMessage2,
-                                              'format': 'org.matrix.custom.html',
-                                              'formatted_body': L10n.of(context).settingsStyleMessage2,
+                                              'body': L10n.of(
+                                                context,
+                                              ).settingsStyleMessage2,
+                                              'format':
+                                                  'org.matrix.custom.html',
+                                              'formatted_body': L10n.of(
+                                                context,
+                                              ).settingsStyleMessage2,
                                             },
                                             originServerTs: DateTime.now(),
                                             senderId: '@y:example.com',
@@ -338,16 +348,21 @@ class SettingsStyleView extends StatelessWidget {
                                             theme.secondaryBubbleColor,
                                             theme.bubbleColor,
                                           ],
-                                          useBubbleLayout: controller.messageStyle == 'bubbles',
+                                          layout: controller.messageStyle,
                                         ),
                                         Message(
                                           Event(
                                             eventId: 'style_dummy_3',
                                             content: {
                                               'msgtype': 'm.text',
-                                              'body': L10n.of(context).settingsStyleMessage3,
-                                              'format': 'org.matrix.custom.html',
-                                              'formatted_body': L10n.of(context).settingsStyleMessage3,
+                                              'body': L10n.of(
+                                                context,
+                                              ).settingsStyleMessage3,
+                                              'format':
+                                                  'org.matrix.custom.html',
+                                              'formatted_body': L10n.of(
+                                                context,
+                                              ).settingsStyleMessage3,
                                             },
                                             originServerTs: DateTime.now(),
                                             senderId: client.userID!,
@@ -374,7 +389,7 @@ class SettingsStyleView extends StatelessWidget {
                                             theme.secondaryBubbleColor,
                                             theme.bubbleColor,
                                           ],
-                                          useBubbleLayout: controller.messageStyle == 'bubbles',
+                                          layout: controller.messageStyle,
                                         ),
                                       ],
                                     ),
@@ -399,7 +414,7 @@ class SettingsStyleView extends StatelessWidget {
                             left: 32,
                             right: 32,
                           ),
-                          child: RadioGroup<String>(
+                          child: RadioGroup<MessageLayout>(
                             onChanged: (value) {
                               if (value != null) {
                                 controller.setMessageStyle(value);
@@ -412,18 +427,29 @@ class SettingsStyleView extends StatelessWidget {
                                 Expanded(
                                   child: Align(
                                     alignment: .center,
-                                    child: _LabeledRadio<String>(
+                                    child: _LabeledRadio<MessageLayout>(
                                       label: L10n.of(context).bubblesLayout,
-                                      value: 'bubbles',
+                                      value: .bubbles,
                                     ),
                                   ),
                                 ),
                                 Expanded(
                                   child: Align(
                                     alignment: .center,
-                                    child: _LabeledRadio<String>(
+                                    child: _LabeledRadio<MessageLayout>(
+                                      label: L10n.of(
+                                        context,
+                                      ).legacyBubblesLayout,
+                                      value: .bubblesLegacy,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Align(
+                                    alignment: .center,
+                                    child: _LabeledRadio<MessageLayout>(
                                       label: L10n.of(context).modernLayout,
-                                      value: 'modern',
+                                      value: .modern,
                                     ),
                                   ),
                                 ),

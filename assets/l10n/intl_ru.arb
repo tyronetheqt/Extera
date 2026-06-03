@@ -3859,6 +3859,7 @@
   "interactiveVerification": "Интерактивное подтверждение",
   "interactiveVerificationDescription": "Если вы находитесь рядом или разговариваете по защищённому каналу связи, вы можете подтвердить все устройства.",
   "messageLayout": "Вид сообщений",
-  "bubblesLayout": "Пузыри",
+  "bubblesLayout": "Новые пузыри",
+  "legacyBubblesLayout": "Пузыри",
   "modernLayout": "Современный"
 }

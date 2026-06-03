@@ -3,6 +3,9 @@ import 'package:matrix/matrix.dart';
 
 import 'message_bubble.dart';
 import 'message_modern.dart';
+import 'message_bubble_legacy.dart';
+
+enum MessageLayout { modern, bubbles, bubblesLegacy }
 
 class Message extends StatelessWidget {
   final Event event;
@@ -26,7 +29,7 @@ class Message extends StatelessWidget {
   final bool singleSelected;
   final Thread? thread;
   final bool hasBeenRead;
-  final bool useBubbleLayout;
+  final MessageLayout layout;
 
   const Message(
     this.event, {
@@ -50,14 +53,14 @@ class Message extends StatelessWidget {
     required this.onMention,
     this.scrollController,
     required this.colors,
-    this.useBubbleLayout = true,
+    this.layout = .bubbles,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (useBubbleLayout) {
-      return MessageBubble(
+    final Widget message = switch (layout) {
+      .bubbles => MessageBubble(
         event,
         onSelect: onSelect,
         onInfoTab: onInfoTab,
@@ -80,9 +83,8 @@ class Message extends StatelessWidget {
         singleSelected: singleSelected,
         thread: thread,
         wallpaperMode: wallpaperMode,
-      );
-    } else {
-      return MessageModern(
+      ),
+      .bubblesLegacy => MessageBubbleLegacy(
         event,
         onSelect: onSelect,
         onInfoTab: onInfoTab,
@@ -105,7 +107,33 @@ class Message extends StatelessWidget {
         singleSelected: singleSelected,
         thread: thread,
         wallpaperMode: wallpaperMode,
-      );
-    }
+      ),
+      .modern => MessageModern(
+        event,
+        onSelect: onSelect,
+        onInfoTab: onInfoTab,
+        scrollToEventId: scrollToEventId,
+        onSwipe: onSwipe,
+        timeline: timeline,
+        onMention: onMention,
+        colors: colors,
+        animateIn: animateIn,
+        displayReadMarker: displayReadMarker,
+        gradient: gradient,
+        hasBeenRead: hasBeenRead,
+        highlightMarker: highlightMarker,
+        key: key,
+        longPressSelect: longPressSelect,
+        nextEvent: nextEvent,
+        previousEvent: previousEvent,
+        scrollController: scrollController,
+        selected: selected,
+        singleSelected: singleSelected,
+        thread: thread,
+        wallpaperMode: wallpaperMode,
+      ),
+    };
+
+    return message;
   }
 }
