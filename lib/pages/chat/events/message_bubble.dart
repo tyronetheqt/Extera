@@ -527,7 +527,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                     ),
                   ),
                 if (ownMessage && event.type == EventTypes.Sticker)
-                  replyDisplay,
+                  Flexible(child: replyDisplay),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -816,7 +816,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                   ),
                 ),
                 if (!ownMessage && event.type == EventTypes.Sticker)
-                  replyDisplay,
+                  Flexible(child: replyDisplay),
               ],
             ),
           ],
