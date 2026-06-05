@@ -574,17 +574,19 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                               ),
                             const ListDivider(),
                           ],
-                          _buildMenuItem(
-                            event: event,
-                            icon: Icons.forward_outlined,
-                            label: L10n.of(context).forward,
-                            onPressed: () {
-                              controller.closeMessageMenu();
-                              controller.forwardEventsAction(event: event);
-                            },
-                          ),
-                          const ListDivider(),
-                          if (!event.redacted)
+                          if (!event.redacted) ...[
+                            _buildMenuItem(
+                              event: event,
+                              icon: Icons.forward_outlined,
+                              label: L10n.of(context).forward,
+                              onPressed: () {
+                                controller.closeMessageMenu();
+                                controller.forwardEventsAction(event: event);
+                              },
+                            ),
+                            const ListDivider(),
+                          ],
+                          if (!event.redacted) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.copy_outlined,
@@ -602,7 +604,8 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                 );
                               },
                             ),
-                          const ListDivider(),
+                            const ListDivider(),
+                          ],
                           _buildMenuItem(
                             event: event,
                             icon: Icons.link,
@@ -613,16 +616,18 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             },
                           ),
                           const ListDivider(),
-                          _buildMenuItem(
-                            event: event,
-                            icon: Icons.check_circle_outline,
-                            label: L10n.of(context).select,
-                            onPressed: () {
-                              controller.closeMessageMenu();
-                              controller.onMultiSelect(event);
-                            },
-                          ),
-                          const ListDivider(),
+                          if (!event.redacted) ...[
+                            _buildMenuItem(
+                              event: event,
+                              icon: Icons.check_circle_outline,
+                              label: L10n.of(context).select,
+                              onPressed: () {
+                                controller.closeMessageMenu();
+                                controller.onMultiSelect(event);
+                              },
+                            ),
+                            const ListDivider(),
+                          ],
                           if (!room.encrypted &&
                               AppSettings.messageTranslation.value &&
                               !event.redacted) ...[
@@ -650,8 +655,9 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             const ListDivider(),
                           ],
                           if (room.canChangeStateEvent(
-                            EventTypes.RoomPinnedEvents,
-                          )) ...[
+                                EventTypes.RoomPinnedEvents,
+                              ) &&
+                              !event.redacted) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.push_pin_outlined,
