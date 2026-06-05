@@ -237,8 +237,7 @@ class EventVideoPlayer extends StatelessWidget {
                   fontSize:
                       AppSettings.fontSizeFactor.value *
                       AppSettings.messageFontSize.value,
-                  decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
+                  decoration: .none,
                 ),
                 trailingSpan: trailingSpan,
                 selectable: true,

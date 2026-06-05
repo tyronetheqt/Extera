@@ -267,8 +267,7 @@ class ImageBubble extends StatelessWidget {
                   fontSize:
                       AppSettings.fontSizeFactor.value *
                       AppSettings.messageFontSize.value,
-                  decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
+                  decoration: .none,
                 ),
                 selectable: true,
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),

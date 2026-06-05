@@ -351,7 +351,7 @@ class MessageContent extends StatelessWidget {
             final messageLinkStyle = TextStyle(
               color: linkColor,
               fontSize: fontSize,
-              decoration: TextDecoration.none,
+              decoration: .none,
             );
             final spanChildren = <InlineSpan>[
               ...?buildTextSpanChildren(

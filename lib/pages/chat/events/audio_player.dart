@@ -392,8 +392,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                       fontSize:
                                           AppSettings.fontSizeFactor.value *
                                           AppSettings.messageFontSize.value,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: linkColor,
+                                      decoration: .none,
                                     ),
                                     onOpen: (url) => UrlLauncher(
                                       context,
