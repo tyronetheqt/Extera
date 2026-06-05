@@ -1,3 +1,9 @@
+## Extera 26.2.82
+- Fix error dialog when rendering invalid LaTeX
+- Fix error dialog sometimes appearing when following a message link
+- Remove links underline (for real this time)
+- Make inline LaTeX syntax not appear when '$' sign is inside links
+
 ## Extera 26.2.81
 - Fix new message bubbles layout issue
 
