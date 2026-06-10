@@ -1,3 +1,6 @@
+## Extera 26.2.83
+- Fix messages being not visible in threads.
+
 ## Extera 26.2.82
 - Fix error dialog when rendering invalid LaTeX
 - Fix error dialog sometimes appearing when following a message link
