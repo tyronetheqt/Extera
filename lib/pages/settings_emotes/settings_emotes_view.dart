@@ -1,3 +1,4 @@
+import 'package:extera_next/widgets/list_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,8 +11,6 @@ import 'package:extera_next/widgets/mxc_image.dart';
 import 'package:extera_next/widgets/mxc_image_viewer.dart';
 import '../../widgets/matrix.dart';
 import 'settings_emotes.dart';
-
-// import 'package:extera_next/widgets/layouts/max_width_body.dart'; // Removed to fix layout error
 
 enum PopupMenuEmojiActions { import, export }
 
@@ -145,14 +144,11 @@ class EmotesSettingsView extends StatelessWidget {
                 ),
               ),
       ),
-      // Fix: Use Center + ConstrainedBox instead of MaxWidthBody to avoid
-      // "unbounded height" error, as CustomScrollView needs bounded vertical space.
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
           child: CustomScrollView(
             slivers: <Widget>[
-              // Header Content (Inputs, Buttons, Toggle)
               SliverToBoxAdapter(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -168,6 +164,19 @@ class EmotesSettingsView extends StatelessWidget {
                         color: theme.colorScheme.surfaceContainerHigh,
                         child: Column(
                           children: [
+                            if (controller.room != null &&
+                                imageKeys.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              SwitchListTile.adaptive(
+                                title: Text(
+                                  L10n.of(context).enableEmotesGlobally,
+                                ),
+                                value: controller.isGloballyActive(client),
+                                onChanged: controller.setIsGloballyActive,
+                              ),
+                              const ListDivider(),
+                              const SizedBox(height: 8),
+                            ],
                             if (controller.room != null) ...[
                               const SizedBox(height: 16),
                               Padding(
@@ -217,15 +226,8 @@ class EmotesSettingsView extends StatelessWidget {
                                   label: Text(L10n.of(context).createSticker),
                                 ),
                               ),
+                              const SizedBox(height: 8),
                             ],
-                            if (controller.room != null && imageKeys.isNotEmpty)
-                              SwitchListTile.adaptive(
-                                title: Text(
-                                  L10n.of(context).enableEmotesGlobally,
-                                ),
-                                value: controller.isGloballyActive(client),
-                                onChanged: controller.setIsGloballyActive,
-                              ),
                           ],
                         ),
                       ),
@@ -233,7 +235,6 @@ class EmotesSettingsView extends StatelessWidget {
                   ],
                 ),
               ),
-              // Emote List or Empty State
               if (imageKeys.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -367,7 +368,6 @@ class EmotesSettingsView extends StatelessWidget {
                     );
                   }, childCount: imageKeys.length),
                 ),
-              // Optional bottom padding for the list
               const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
             ],
           ),
