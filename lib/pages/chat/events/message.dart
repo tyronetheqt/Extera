@@ -1,3 +1,4 @@
+import 'package:extera_next/pages/chat/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -24,6 +25,7 @@ class Message extends StatelessWidget {
   final bool animateIn;
   final bool wallpaperMode;
   final ScrollController? scrollController;
+  final ChatController? chatController;
   final List<Color> colors;
   final bool gradient;
   final bool singleSelected;
@@ -52,6 +54,7 @@ class Message extends StatelessWidget {
     this.wallpaperMode = false,
     required this.onMention,
     this.scrollController,
+    this.chatController,
     required this.colors,
     this.layout = .bubbles,
     super.key,
@@ -79,6 +82,7 @@ class Message extends StatelessWidget {
         nextEvent: nextEvent,
         previousEvent: previousEvent,
         scrollController: scrollController,
+        chatController: chatController,
         selected: selected,
         singleSelected: singleSelected,
         thread: thread,
@@ -103,6 +107,7 @@ class Message extends StatelessWidget {
         nextEvent: nextEvent,
         previousEvent: previousEvent,
         scrollController: scrollController,
+        chatController: chatController,
         selected: selected,
         singleSelected: singleSelected,
         thread: thread,
@@ -127,6 +132,7 @@ class Message extends StatelessWidget {
         nextEvent: nextEvent,
         previousEvent: previousEvent,
         scrollController: scrollController,
+        chatController: chatController,
         selected: selected,
         singleSelected: singleSelected,
         thread: thread,

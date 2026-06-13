@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:extera_next/pages/chat/chat.dart';
 import 'package:extera_next/pages/chat/events/file_sending_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,6 +45,7 @@ class MessageBubbleLegacy extends StatefulWidget {
   final bool animateIn;
   final bool wallpaperMode;
   final ScrollController? scrollController;
+  final ChatController? chatController;
   final List<Color> colors;
   final bool gradient;
   final bool singleSelected;
@@ -71,6 +73,7 @@ class MessageBubbleLegacy extends StatefulWidget {
     this.wallpaperMode = false,
     required this.onMention,
     this.scrollController,
+    this.chatController,
     required this.colors,
     super.key,
   });
@@ -845,7 +848,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                 left: (ownMessage ? 0 : Avatar.defaultSize) + 12.0,
                 right: ownMessage ? 0 : 12.0,
               ),
-              child: MessageReactions(event, timeline),
+              child: MessageReactions(event, timeline, chatController: widget.chatController),
             ),
           if (widget.displayReadMarker)
             Row(

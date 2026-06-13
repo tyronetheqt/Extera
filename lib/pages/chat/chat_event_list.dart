@@ -34,7 +34,10 @@ class ChatEventList extends StatelessWidget {
 
     final colors = [theme.secondaryBubbleColor, theme.bubbleColor];
 
-    final latestReadEvent = controller.room.getLatestReadMessage(timeline);
+    final latestReadEvent = controller.room.getLatestReadMessage(
+      timeline,
+      userID: controller.room.directChatMatrixID, // If in a DM, show double check mark only when read by second party. Bridged DMs may have bridge bots sending read marks after message delivery to remote platform
+    );
 
     final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
 
@@ -103,6 +106,7 @@ class ChatEventList extends StatelessWidget {
             wallpaperMode: hasWallpaper,
             colors: colors,
             gradient: AppSettings.enableGradient.value,
+            chatController: controller,
           ),
         ),
       );

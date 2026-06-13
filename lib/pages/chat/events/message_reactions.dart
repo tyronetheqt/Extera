@@ -1,3 +1,5 @@
+import 'package:extera_next/pages/chat/chat.dart';
+import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -13,8 +15,14 @@ import 'package:extera_next/widgets/mxc_image.dart';
 class MessageReactions extends StatelessWidget {
   final Event event;
   final Timeline timeline;
+  final ChatController? chatController;
 
-  const MessageReactions(this.event, this.timeline, {super.key});
+  const MessageReactions(
+    this.event,
+    this.timeline, {
+    this.chatController,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +43,11 @@ class MessageReactions extends StatelessWidget {
             key: key,
             count: 0,
             reacted: false,
-            reactors: [],
+            reactionEvents: [],
           );
         }
         reactionMap[key]!.count++;
-        reactionMap[key]!.reactors!.add(e.senderFromMemoryOrFallback);
+        reactionMap[key]!.reactionEvents!.add(e);
         reactionMap[key]!.reacted |= e.senderId == e.room.client.userID;
       }
     }
@@ -74,9 +82,10 @@ class MessageReactions extends StatelessWidget {
                 event.room.sendReaction(event.eventId, r.key);
               }
             },
-            onLongPress: () async => await _AdaptableReactorsDialog(
+            onLongPress: () async => await _AdaptiveReactorsDialog(
               client: client,
               reactionEntry: r,
+              chatController: chatController,
             ).show(context),
           ),
         ),
@@ -162,7 +171,9 @@ class _Reaction extends StatelessWidget {
     return InkWell(
       onTap: () => onTap != null ? onTap!() : null,
       onLongPress: () => onLongPress != null ? onLongPress!() : null,
-      onSecondaryTap: () => onLongPress != null ? onLongPress!() : null, // It is better to make it a seperate option
+      onSecondaryTap: () => onLongPress != null
+          ? onLongPress!()
+          : null, // It is better to make it a seperate option
       borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
       child: Container(
         decoration: BoxDecoration(
@@ -180,57 +191,124 @@ class _ReactionEntry {
   String key;
   int count;
   bool reacted;
-  List<User>? reactors;
+  List<Event>? reactionEvents;
 
   _ReactionEntry({
     required this.key,
     required this.count,
     required this.reacted,
-    this.reactors,
+    this.reactionEvents,
   });
 }
 
-class _AdaptableReactorsDialog extends StatelessWidget {
+class _AdaptiveReactorsDialog extends StatelessWidget {
   final Client? client;
   final _ReactionEntry? reactionEntry;
+  final ChatController? chatController;
 
-  const _AdaptableReactorsDialog({this.client, this.reactionEntry});
+  const _AdaptiveReactorsDialog({
+    this.client,
+    this.chatController,
+    this.reactionEntry,
+  });
 
-  Future<bool?> show(BuildContext context) => showAdaptiveDialog(
+  Future<bool?> show(BuildContext context) => showAdaptiveBottomSheet(
     context: context,
     builder: (context) => this,
-    barrierDismissible: true,
     useRootNavigator: false,
   );
 
   @override
   Widget build(BuildContext context) {
-    final body = SingleChildScrollView(
-      child: Wrap(
-        spacing: 8.0,
-        runSpacing: 4.0,
-        alignment: WrapAlignment.center,
-        children: <Widget>[
-          for (final reactor in reactionEntry!.reactors!)
-            Chip(
-              avatar: Avatar(
-                mxContent: reactor.avatarUrl,
-                name: reactor.displayName,
-                client: client,
-                presenceUserId: reactor.stateKey,
-              ),
-              label: Text(reactor.displayName ?? reactor.id),
+    final theme = Theme.of(context);
+    // final body = SingleChildScrollView(
+    //   child: Wrap(
+    //     spacing: 8.0,
+    //     runSpacing: 4.0,
+    //     alignment: WrapAlignment.center,
+    //     children: <Widget>[
+    //       for (final reactor in reactionEntry!.reactors!)
+    //         Chip(
+    //           avatar: Avatar(
+    //             mxContent: reactor.avatarUrl,
+    //             name: reactor.displayName,
+    //             client: client,
+    //             presenceUserId: reactor.stateKey,
+    //           ),
+    //           label: Text(reactor.displayName ?? reactor.id),
+    //         ),
+    //     ],
+    //   ),
+    // );
+
+    final reactionEvents = reactionEntry!.reactionEvents;
+
+    if (reactionEvents == null) {
+      return Text("reactionEvents == null");
+    }
+
+    final title = reactionEntry!.key.startsWith('mxc://')
+        ? MxcImage(uri: Uri.parse(reactionEntry!.key), width: 32, height: 32)
+        : Text(reactionEntry!.key);
+
+    return Scaffold(
+      appBar: AppBar(title: title),
+      body: Center(
+        child: Padding(
+          padding: const .all(8),
+          child: Material(
+            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            color: theme.colorScheme.surfaceContainerHigh,
+            clipBehavior: .hardEdge,
+            child: CustomScrollView(
+              slivers: [
+                SliverList.builder(
+                  itemBuilder: (context, i) {
+                    final event = reactionEvents[i];
+                    final user = event.senderFromMemoryOrFallback;
+
+                    return ListTile(
+                      leading: Avatar(
+                        mxContent: user.avatarUrl,
+                        size: 32,
+                        name: user.displayName ?? user.id,
+                        key: ValueKey(user.id),
+                      ),
+                      trailing: chatController == null
+                          ? null
+                          : Row(
+                              mainAxisSize: .min,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    chatController?.replyAction(event);
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: const Icon(Icons.reply_outlined),
+                                ),
+                                if (event.canRedact)
+                                  IconButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      chatController?.redactEventsAction(
+                                        event: event,
+                                      );
+                                    },
+                                    color: theme.colorScheme.error,
+                                    icon: const Icon(Icons.close),
+                                  ),
+                              ],
+                            ),
+                      title: Text(user.displayName ?? user.id),
+                    );
+                  },
+                  itemCount: reactionEvents.length,
+                ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
-
-    final title = Center(
-      child: reactionEntry!.key.startsWith('mxc://')
-          ? MxcImage(uri: Uri.parse(reactionEntry!.key), width: 32, height: 32)
-          : Text(reactionEntry!.key),
-    );
-
-    return AlertDialog.adaptive(title: title, content: body);
   }
 }
