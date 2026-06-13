@@ -1,6 +1,6 @@
 {
 	"@@locale": "nl",
-	"@@last_modified": "2026-06-03T13:48:56.535Z",
+	"@@last_modified": "2026-06-13T01:28:11.326Z",
 	"@choicesSelected": {
 		"type": "String",
 		"placeholders": {
@@ -3785,5 +3785,48 @@
 	"messageLayout": "Berichtweergave",
 	"bubblesLayout": "Nieuwe tekstbubbels",
 	"legacyBubblesLayout": "Tekstbubbels",
-	"modernLayout": "Modern"
+	"modernLayout": "Modern",
+	"sendStickers": "Stickers verzenden",
+	"sendReactions": "Reacties verzenden",
+	"pinMessages": "Berichten vastzetten",
+	"otherMessageEvents": "Andere berichtgebeurtenissen",
+	"startOrJoinCalls": "Deelnemen aan gesprekken",
+	"moderation": "Moderatie",
+	"kickUsers": "Gebruikers verwijderen",
+	"banUsers": "Gebruikers verbannen",
+	"redactMessages": "Berichten verwijderen",
+	"redactOwnMessages": "Eigen berichten verwijderen",
+	"roomMetadata": "Kamermetadata",
+	"editRoomName": "Kamernaam bewerken",
+	"editRoomTopic": "Kameronderwerp bewerken",
+	"roomSettings": "Kamerinstellingen",
+	"editWidgets": "Widgets bewerken",
+	"editRoomEmotes": "Kamer-emotes bewerken",
+	"editPermissions": "Rechten bewerken",
+	"editJoinRules": "Toegangsregels bewerken",
+	"upgradeRoom": "Kamer upgraden",
+	"editOtherRoomSettings": "Overige kamerinstellingen bewerken",
+	"other": "Overig",
+	"powerLevelMustBeANumber": "Machtsniveau moet een getal zijn",
+	"cannotExceedPowerLevel": "Machtsniveau mag niet hoger zijn dan {powerLevel}",
+	"maxPowerLevel": "Maximum: {powerLevel}",
+	"member": "Lid",
+	"powerLevel": "Machtsniveau",
+	"apply": "Toepassen",
+	"@cannotExceedPowerLevel": {
+		"placeholders": {
+			"powerLevel": {
+				"type": "int",
+				"example": "100"
+			}
+		}
+	},
+	"@maxPowerLevel": {
+		"placeholders": {
+			"powerLevel": {
+				"type": "int",
+				"example": "100"
+			}
+		}
+	}
 }

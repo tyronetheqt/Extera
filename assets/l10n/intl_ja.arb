@@ -32,7 +32,7 @@
 	"cleanExif": "EXIFを削除",
 	"cleanExifDescription": "送信前に画像からEXIFメタデータ（カメラモデル、位置情報、時刻）を削除します。",
 	"@@locale": "ja",
-	"@@last_modified": "2026-06-03T13:38:57.507Z",
+	"@@last_modified": "2026-06-13T01:28:40.522Z",
 	"doNotSendIfCantClean": "クリーンできない画像を送信しない",
 	"doNotSendIfCantCleanDescription": "EXIFメタデータを削除できない場合、画像を送信しません",
 	"repeatPassword": "パスワードを再入力",
@@ -3785,5 +3785,48 @@
 	"messageLayout": "メッセージのレイアウト",
 	"bubblesLayout": "新しいバブル",
 	"legacyBubblesLayout": "バブル",
-	"modernLayout": "モダン"
+	"modernLayout": "モダン",
+	"sendStickers": "ステッカーの送信",
+	"sendReactions": "リアクションの送信",
+	"pinMessages": "メッセージのピン留め",
+	"otherMessageEvents": "その他のメッセージイベント",
+	"startOrJoinCalls": "通話の開始・参加",
+	"moderation": "モデレーション",
+	"kickUsers": "ユーザーをキック",
+	"banUsers": "ユーザーをBAN",
+	"redactMessages": "メッセージの削除",
+	"redactOwnMessages": "自分のメッセージを削除",
+	"roomMetadata": "ルームのメタデータ",
+	"editRoomName": "ルーム名の編集",
+	"editRoomTopic": "トピックの編集",
+	"roomSettings": "ルーム設定",
+	"editWidgets": "ウィジェットの編集",
+	"editRoomEmotes": "ルーム絵文字の編集",
+	"editPermissions": "権限の編集",
+	"editJoinRules": "参加ルールの編集",
+	"upgradeRoom": "ルームのアップグレード",
+	"editOtherRoomSettings": "その他のルーム設定の変更",
+	"other": "その他",
+	"powerLevelMustBeANumber": "数値で入力してください",
+	"cannotExceedPowerLevel": "権限レベルは {powerLevel} を超えることはできません",
+	"maxPowerLevel": "最大: {powerLevel}",
+	"member": "メンバー",
+	"powerLevel": "権限レベル",
+	"apply": "適用",
+	"@cannotExceedPowerLevel": {
+		"placeholders": {
+			"powerLevel": {
+				"type": "int",
+				"example": "100"
+			}
+		}
+	},
+	"@maxPowerLevel": {
+		"placeholders": {
+			"powerLevel": {
+				"type": "int",
+				"example": "100"
+			}
+		}
+	}
 }
