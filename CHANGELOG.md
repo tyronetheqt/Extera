@@ -1,3 +1,8 @@
+## Extera 26.2.9
+- Redact & Reply to reactions.
+- Update chat permissions settings page.
+- Update read check marker in DMs.
+
 ## Extera 26.2.83
 - Fix messages being not visible in threads.
 
