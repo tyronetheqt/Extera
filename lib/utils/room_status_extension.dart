@@ -74,11 +74,15 @@ extension RoomStatusExtension on Room {
     return true;
   }
 
-  String? getLatestReadMessage(Timeline timeline) {
+  String? getLatestReadMessage(Timeline timeline, {String? userID}) {
     if (timeline.events.isEmpty) return null;
     for (final event in timeline.events.filterByVisibleInGui()) {
       if (event.receipts
-          .where((receipt) => receipt.user.id != client.userID!)
+          .where(
+            (receipt) => userID == null
+                ? receipt.user.id != client.userID!
+                : receipt.user.id == userID,
+          )
           .isNotEmpty) {
         return event.eventId;
       }
